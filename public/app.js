@@ -4,7 +4,7 @@ const context = canvas.getContext('2d');
 // Configuraciones
 const frameCount = 329; // TOTAL DE IMÁGENES (Ajusta este número tras extraerlas)
 const images = [];
-const imagePath = (index) => `./imagenes_scroll/frame_${(index + 1).toString().padStart(4, '0')}.jpg`; // Ruta de las imágenes
+const imagePath = (index) => `./imagenes_scroll/frame_${(index + 1).toString().padStart(4, '0')}.jpg`; // Ruta de las imágenes mejoradas con Real-ESRGAN Anime
 
 // Pre-cargar imágenes de forma asíncrona para no bloquear el hilo principal
 const preloadImages = () => {
@@ -145,7 +145,7 @@ if(images.length > 0) {
 // STORYTELLING CHARTS LOGIC
 // ==========================================
 
-function createPodium(containerId, data, valueKey, formatValue = (v) => v, titleText = "EL MEJOR", ascending = false) {
+function createPodium(containerId, data, valueKey, formatValue = (v) => v, titleText = "EL MEJOR", ascending = false, podiumType = "positive") {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -164,6 +164,8 @@ function createPodium(containerId, data, valueKey, formatValue = (v) => v, title
     const visualClasses = ['place-2', 'place-1', 'place-3'];
     const visualLabels = ['2', '1', '3'];
 
+    const valueColor = podiumType === 'negative' ? 'var(--negative-color)' : 'var(--positive-color)';
+
     let html = '';
     visualOrder.forEach((team, index) => {
         if (!team) return; // Por si hay menos de 3 equipos
@@ -176,7 +178,7 @@ function createPodium(containerId, data, valueKey, formatValue = (v) => v, title
                 <div class="podium-team-info">
                     ${isFirst ? `<div class="podium-title">${titleText}</div>` : ''}
                     <img src="${getLogoUrl(team.Equipo)}" alt="${team.Equipo}" class="podium-logo" onerror="this.src='https://via.placeholder.com/50'">
-                    <div class="podium-value">${formatValue(val)}</div>
+                    <div class="podium-value" style="background-color: ${valueColor};">${formatValue(val)}</div>
                 </div>
                 <div class="podium-base">${visualLabels[index]}</div>
             </div>
@@ -196,33 +198,33 @@ function renderStoryCharts() {
         Puntos: tablaData.find(t => t.Equipo === d.Equipo)?.Puntos || 0
     }));
     
-    createPodium('podium-1', chartsDataWithPoints, 'Puntos', v => `${v} pts`, "MÁS PUNTOS");
+    createPodium('podium-1', chartsDataWithPoints, 'Puntos', v => `${v} pts`, "MÁS PUNTOS", false, 'positive');
 
     // ----------------------------------------------------
     // 2. Goles Local vs Visitante
     // ----------------------------------------------------
-    createPodium('podium-2', chartsData, (d) => d['Goles Local'] + d['Goles Visitante'], v => `${v} goles`, "MÁS GOLEADOR");
+    createPodium('podium-2', chartsData, (d) => d['Goles Local'] + d['Goles Visitante'], v => `${v} goles`, "MÁS GOLEADOR", false, 'positive');
 
     // ----------------------------------------------------
     // 3. Posesión del Balón
     // ----------------------------------------------------
-    createPodium('podium-3', chartsData, 'Posesion Promedio', v => `${v}%`, "MAYOR POSESIÓN");
+    createPodium('podium-3', chartsData, 'Posesion Promedio', v => `${v}%`, "MAYOR POSESIÓN", false, 'positive');
 
     // ----------------------------------------------------
     // 4. Tiros de Esquina (A Favor vs En Contra)
     // ----------------------------------------------------
-    createPodium('podium-4', chartsData, 'Corners A Favor', v => `${v}`, "MÁS CÓRNERS");
+    createPodium('podium-4', chartsData, 'Corners A Favor', v => `${v}`, "MÁS CÓRNERS", false, 'positive');
 
     // ----------------------------------------------------
     // 5. Tarjetas (Rojas y Amarillas vs Rival)
     // ----------------------------------------------------
     // Para el podio de indisciplina, sumamos amarillas y rojas (las rojas valen más)
-    createPodium('podium-5', chartsData, (d) => d['Amarillas Cometidas'] + (d['Rojas Cometidas'] * 3), (v) => `Pts Castigo`, "MÁS INDISCIPLINADO");
+    createPodium('podium-5', chartsData, (d) => d['Amarillas Cometidas'] + (d['Rojas Cometidas'] * 3), (v) => `Pts Castigo`, "MÁS INDISCIPLINADO", false, 'negative');
 
     // ----------------------------------------------------
     // 6. Penales
     // ----------------------------------------------------
-    createPodium('podium-6', chartsData, 'Penales A Favor', v => `${v}`, "MÁS PENALES");
+    createPodium('podium-6', chartsData, 'Penales A Favor', v => `${v}`, "MÁS PENALES", false, 'positive');
 }
 
 // ==========================================
@@ -240,6 +242,8 @@ const matchups = [
 // Helper to get logo path
 const getLogoUrl = (team) => `logos/${team}.webp`;
 
+const logosCache = {};
+
 // Helper to get result class
 const getResultClass = (result) => {
     if (result === 'G') return 'circle-W';
@@ -250,6 +254,13 @@ const getResultClass = (result) => {
 
 // Initialize Dashboard
 document.addEventListener("DOMContentLoaded", () => {
+    // Preload logos for charts
+    chartsData.forEach(d => {
+        const img = new Image();
+        img.src = getLogoUrl(d.Equipo);
+        logosCache[d.Equipo] = img;
+    });
+
     renderStoryCharts(); // Inicializar las gráficas de la historia
     renderBracket();
     renderTable();
@@ -361,8 +372,64 @@ function renderTable() {
 function renderCharts() {
     Chart.defaults.color = '#555555';
     Chart.defaults.font.family = "'Chakra Petch', sans-serif";
-    
-    const labels = chartsData.map(d => d.Equipo);
+
+    // Plugin para dibujar logos en lugar de texto en los ejes
+    const drawLogosPlugin = {
+        id: 'drawLogos',
+        afterDraw(chart) {
+            const { ctx, chartArea: { bottom, left }, scales: { x, y } } = chart;
+            const isHorizontal = chart.config.options.indexAxis === 'y';
+            
+            chart.data.labels.forEach((teamName, index) => {
+                const img = logosCache[teamName];
+                if (!img || !img.complete) return;
+                
+                const size = 24;
+                if (isHorizontal) {
+                    const yPos = y.getPixelForTick(index);
+                    const xPos = left - size - 5;
+                    ctx.drawImage(img, xPos, yPos - size / 2, size, size);
+                } else {
+                    const xPos = x.getPixelForTick(index);
+                    const yPos = bottom + 5;
+                    ctx.drawImage(img, xPos - size / 2, yPos, size, size);
+                }
+            });
+        }
+    };
+
+    // Función para crear patrón diagonal
+    const createDiagonalPattern = (color) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8;
+        canvas.height = 8;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = 'rgba(255,255,255,0)';
+        ctx.fillRect(0, 0, 8, 8);
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, 8);
+        ctx.lineTo(8, 0);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-4, 4);
+        ctx.lineTo(4, -4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(4, 12);
+        ctx.lineTo(12, 4);
+        ctx.stroke();
+        
+        return ctx.createPattern(canvas, 'repeat');
+    };
+
+    // Helper for sorting data
+    const getSortedData = (keyFunction) => {
+        return [...chartsData].sort((a, b) => keyFunction(b) - keyFunction(a));
+    };
 
     // Light Theme Palette
     const cGreen = '#00C853';  
@@ -377,6 +444,9 @@ function renderCharts() {
         responsive: true,
         maintainAspectRatio: false,
         animation: { duration: 1500, easing: 'easeOutQuart' },
+        layout: {
+            padding: { left: 10, bottom: 25 } // Espacio para los logos
+        },
         plugins: {
             title: { 
                 display: true, 
@@ -389,19 +459,29 @@ function renderCharts() {
             legend: { position: 'bottom', labels: { color: '#555555', boxWidth: 12 } }
         },
         scales: {
-            y: { stacked: isStacked, grid: { color: cGrid }, border: { dash: [4, 4] } },
-            x: { stacked: isStacked, grid: { color: cGrid } }
+            y: { 
+                stacked: isStacked, 
+                grid: { color: cGrid }, 
+                border: { dash: [4, 4] },
+                ticks: { color: 'transparent' } // Ocultar texto
+            },
+            x: { 
+                stacked: isStacked, 
+                grid: { color: cGrid },
+                ticks: { color: 'transparent' } // Ocultar texto
+            }
         }
     });
 
     // 1. Posesión
+    const sortedPossession = getSortedData(d => d['Posesion Promedio']);
     new Chart(document.getElementById('chart-possession'), {
         type: 'line',
         data: {
-            labels,
+            labels: sortedPossession.map(d => d.Equipo),
             datasets: [{
                 label: 'Posesión Promedio (%)',
-                data: chartsData.map(d => d['Posesion Promedio']),
+                data: sortedPossession.map(d => d['Posesion Promedio']),
                 borderColor: cGreen,
                 backgroundColor: 'rgba(0, 200, 83, 0.1)',
                 borderWidth: 2,
@@ -412,62 +492,103 @@ function renderCharts() {
                 pointHoverRadius: 6
             }]
         },
-        options: getOptions('// POSESIÓN DEL BALÓN (%)')
+        options: {
+            ...getOptions('// POSESIÓN DEL BALÓN (%)'),
+            scales: {
+                ...getOptions('').scales,
+                y: { ...getOptions('').scales.y, ticks: { color: '#555555' } } // Mostrar texto en Y
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
     // 2. Goles
+    const sortedGoals = getSortedData(d => d['Goles Local'] + d['Goles Visitante']);
     new Chart(document.getElementById('chart-goals'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedGoals.map(d => d.Equipo),
             datasets: [
-                { label: 'Goles de Local', data: chartsData.map(d => d['Goles Local']), backgroundColor: cGreen },
-                { label: 'Goles de Visitante', data: chartsData.map(d => d['Goles Visitante']), backgroundColor: cGrey }
+                { label: 'Goles de Local', data: sortedGoals.map(d => d['Goles Local']), backgroundColor: cGreen },
+                { label: 'Goles de Visitante', data: sortedGoals.map(d => d['Goles Visitante']), backgroundColor: cGrey }
             ]
         },
-        options: getOptions('// GOLES (LOCAL VS VISITANTE)', true)
+        options: {
+            ...getOptions('// GOLES (LOCAL VS VISITANTE)', true),
+            scales: {
+                ...getOptions('', true).scales,
+                y: { ...getOptions('', true).scales.y, ticks: { color: '#555555' } } // Mostrar texto en Y
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
     // 3. Penales
+    const sortedPenalties = getSortedData(d => d['Penales A Favor']);
     new Chart(document.getElementById('chart-penalties'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedPenalties.map(d => d.Equipo),
             datasets: [
-                { label: 'Penales a Nuestro Favor', data: chartsData.map(d => d['Penales A Favor']), backgroundColor: cGreen },
-                { label: 'Penales en Contra', data: chartsData.map(d => d['Penales En Contra']), backgroundColor: cRed }
+                { label: 'Penales a Nuestro Favor', data: sortedPenalties.map(d => d['Penales A Favor']), backgroundColor: cGreen },
+                { label: 'Penales en Contra', data: sortedPenalties.map(d => d['Penales En Contra']), backgroundColor: cRed }
             ]
         },
-        options: getOptions('// PENALES (A FAVOR VS EN CONTRA)')
+        options: {
+            ...getOptions('// PENALES (A FAVOR VS EN CONTRA)'),
+            scales: {
+                ...getOptions('').scales,
+                y: { ...getOptions('').scales.y, ticks: { color: '#555555' } } // Mostrar texto en Y
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
     // 4. Corners
+    const sortedCorners = getSortedData(d => d['Corners A Favor']);
     new Chart(document.getElementById('chart-corners'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedCorners.map(d => d.Equipo),
             datasets: [
-                { label: 'Corners a Nuestro Favor', data: chartsData.map(d => d['Corners A Favor']), backgroundColor: cGreen },
-                { label: 'Corners en Nuestra Contra', data: chartsData.map(d => d['Corners En Contra']), backgroundColor: cRed }
+                { label: 'Corners a Nuestro Favor', data: sortedCorners.map(d => d['Corners A Favor']), backgroundColor: cGreen },
+                { label: 'Corners en Nuestra Contra', data: sortedCorners.map(d => d['Corners En Contra']), backgroundColor: cRed }
             ]
         },
-        options: { ...getOptions('// TIROS DE ESQUINA'), indexAxis: 'y' }
+        options: { 
+            ...getOptions('// TIROS DE ESQUINA'), 
+            indexAxis: 'y',
+            layout: { padding: { left: 25, bottom: 10 } }, // Ajuste para horizontal
+            scales: {
+                ...getOptions('').scales,
+                x: { ...getOptions('').scales.x, ticks: { color: '#555555' } } // Mostrar texto en X
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
     // 5. Atajadas
+    const sortedSaves = getSortedData(d => d['Atajadas']);
     new Chart(document.getElementById('chart-saves'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedSaves.map(d => d.Equipo),
             datasets: [
-                { label: 'Atajadas de Nuestro Portero', data: chartsData.map(d => d['Atajadas']), backgroundColor: cGreen },
-                { label: 'Atajadas del Portero Rival', data: chartsData.map(d => d['Atajadas En Contra']), backgroundColor: cRed }
+                { label: 'Atajadas de Nuestro Portero', data: sortedSaves.map(d => d['Atajadas']), backgroundColor: cGreen },
+                { label: 'Atajadas del Portero Rival', data: sortedSaves.map(d => d['Atajadas En Contra']), backgroundColor: cRed }
             ]
         },
-        options: getOptions('// ATAJADAS (NUESTRAS VS RIVAL)')
+        options: {
+            ...getOptions('// ATAJADAS (NUESTRAS VS RIVAL)'),
+            scales: {
+                ...getOptions('').scales,
+                y: { ...getOptions('').scales.y, ticks: { color: '#555555' } } // Mostrar texto en Y
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
-    // 6. Faltas
+    // 6. Faltas (No ordenamos porque es scatter/bubble)
     const teamColors = [
         '#C2A649', '#FCE116', '#ED1C24', '#FDB913', 
         '#002D62', '#000000', '#004A8B', '#E60000'
@@ -507,41 +628,50 @@ function renderCharts() {
                 }
             },
             scales: {
-                x: { title: { display: true, text: 'Faltas que Cometimos', color: '#555555' }, grid: { color: cGrid } },
-                y: { title: { display: true, text: 'Faltas que Sufrimos', color: '#555555' }, grid: { color: cGrid } }
+                x: { title: { display: true, text: 'Faltas que Cometimos', color: '#555555' }, grid: { color: cGrid }, ticks: { color: '#555555' } },
+                y: { title: { display: true, text: 'Faltas que Sufrimos', color: '#555555' }, grid: { color: cGrid }, ticks: { color: '#555555' } }
             }
         }
     });
 
     // 7. Tarjetas
+    const sortedCards = getSortedData(d => d['Amarillas Cometidas'] + (d['Rojas Cometidas'] * 3));
     new Chart(document.getElementById('chart-cards'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedCards.map(d => d.Equipo),
             datasets: [
-                { label: 'Nuestras Amarillas', data: chartsData.map(d => d['Amarillas Cometidas']), backgroundColor: cYellow, stack: 'Nuestras' },
-                { label: 'Nuestras Rojas', data: chartsData.map(d => d['Rojas Cometidas']), backgroundColor: cRed, stack: 'Nuestras' },
-                { label: 'Amarillas del Rival', data: chartsData.map(d => d['Amarillas Recibidas']), backgroundColor: 'rgba(255, 204, 0, 0.5)', stack: 'Rival' },
-                { label: 'Rojas del Rival', data: chartsData.map(d => d['Rojas Recibidas']), backgroundColor: 'rgba(211, 47, 47, 0.5)', stack: 'Rival' }
+                { label: 'Nuestras Amarillas', data: sortedCards.map(d => d['Amarillas Cometidas']), backgroundColor: cYellow, stack: 'Nuestras' },
+                { label: 'Nuestras Rojas', data: sortedCards.map(d => d['Rojas Cometidas']), backgroundColor: cRed, stack: 'Nuestras' },
+                { label: 'Amarillas del Rival', data: sortedCards.map(d => d['Amarillas Recibidas']), backgroundColor: createDiagonalPattern('#FBC02D'), stack: 'Rival' },
+                { label: 'Rojas del Rival', data: sortedCards.map(d => d['Rojas Recibidas']), backgroundColor: createDiagonalPattern('#D32F2F'), stack: 'Rival' }
             ]
         },
-        options: getOptions('// TARJETAS (NUESTRAS VS RIVAL)', true)
+        options: {
+            ...getOptions('// TARJETAS (NUESTRAS VS RIVAL)', true),
+            scales: {
+                ...getOptions('', true).scales,
+                y: { ...getOptions('', true).scales.y, ticks: { color: '#555555' } } // Mostrar texto en Y
+            }
+        },
+        plugins: [drawLogosPlugin]
     });
 
     // 8. Offsides
+    const sortedOffsides = getSortedData(d => d['Offsides Recibidos']);
     new Chart(document.getElementById('chart-offsides'), {
         type: 'bar',
         data: {
-            labels,
+            labels: sortedOffsides.map(d => d.Equipo),
             datasets: [
                 {
                     label: 'Offsides que Provocamos',
-                    data: chartsData.map(d => d['Offsides Recibidos']),
+                    data: sortedOffsides.map(d => d['Offsides Recibidos']),
                     backgroundColor: cGreen
                 },
                 {
                     label: 'Offsides en que Caímos',
-                    data: chartsData.map(d => d['Offsides Cometidos']),
+                    data: sortedOffsides.map(d => d['Offsides Cometidos']),
                     backgroundColor: cRed
                 }
             ]
@@ -549,10 +679,16 @@ function renderCharts() {
         options: {
             ...getOptions('// TRAMPA DEL FUERA DE LUGAR (PROVOCADOS VS COMETIDOS)'),
             indexAxis: 'y', // Barras horizontales para lectura rápida
+            layout: { padding: { left: 25, bottom: 10 } }, // Ajuste para horizontal
             plugins: {
                 ...getOptions('').plugins,
                 legend: { display: true, position: 'bottom' } 
+            },
+            scales: {
+                ...getOptions('').scales,
+                x: { ...getOptions('').scales.x, ticks: { color: '#555555' } } // Mostrar texto en X
             }
-        }
+        },
+        plugins: [drawLogosPlugin]
     });
 }

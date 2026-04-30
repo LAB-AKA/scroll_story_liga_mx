@@ -26,7 +26,17 @@
             <div class="scroll-arrow"></div>
         </div>
 
-        <!-- INTRODUCCIÓN CON HOOK -->
+        <!-- NUEVA INTRODUCCIÓN -->
+        <section class="step">
+            <div class="text-box gala-box">
+                <h1>Telemetría de la Recta Final</h1>
+                <p>¿Por qué enfocarnos únicamente en la recta final del torneo regular? Analizar la ventana de los últimos 5 partidos nos permite aislar el <strong>momentum</strong> real de cada equipo. Las dinámicas de juego, rachas y niveles de fatiga recientes son indicadores mucho más precisos que el desempeño de hace tres meses. Aunque no garantiza al futuro campeón, esta telemetría es la base estadística ideal para intentar predecir quiénes lograrán superar la primera fase eliminatoria de la Liguilla.</p>
+            </div>
+        </section>
+        
+        <div class="scroll-spacer"></div>
+
+        <!-- INTRODUCCIÓN CON HOOK (AHORA SEGUNDA SECCIÓN) -->
         <section class="step">
             <div class="text-box gala-box">
                 <h1>Gala de la Liga MX: Los Premios del Momento</h1>
@@ -100,9 +110,6 @@
                 <span class="red-slash">//</span> LIGA MX
             </div>
             <h1>Telemetría de los ultimos 5 partidos</h1>
-            <p class="subtitle" style="max-width: 800px; line-height: 1.6; text-transform: none; font-weight: 500;">
-                ¿Por qué enfocarnos únicamente en la recta final del torneo regular? Analizar la ventana de los últimos 5 partidos nos permite aislar el <strong>momentum</strong> real de cada equipo. Las dinámicas de juego, rachas y niveles de fatiga recientes son indicadores mucho más precisos que el desempeño de hace tres meses. Aunque no garantiza al futuro campeón, esta telemetría es la base estadística ideal para intentar predecir quiénes lograrán superar la primera fase eliminatoria de la Liguilla.
-            </p>
         </header>
 
         <main class="dashboard-container">
@@ -126,6 +133,18 @@
 
                 <div class="panel panel-table">
                     <h2><span class="red-slash">//</span> STANDINGS</h2>
+                    <p class="table-description" style="font-family: var(--font-data); font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+                        Esta tabla general filtra exclusivamente a los finalistas, analizando su desempeño solo en los <strong>últimos 5 partidos</strong> (con un máximo posible de 15 puntos). Sirve para medir el estado de forma actual con el que cada equipo entra a la Liguilla.
+                    </p>
+                    <div class="form-legend table-legend" style="margin-bottom: 1rem; border-bottom: none; padding-bottom: 0;">
+                        <div class="legend-item"><strong>PTS:</strong> Puntos</div>
+                        <div class="legend-item"><strong>JG:</strong> Partidos Ganados</div>
+                        <div class="legend-item"><strong>JE:</strong> Partidos Empatados</div>
+                        <div class="legend-item"><strong>JP:</strong> Partidos Perdidos</div>
+                        <div class="legend-item"><strong>GF:</strong> Goles a Favor</div>
+                        <div class="legend-item"><strong>GC:</strong> Goles en Contra</div>
+                        <div class="legend-item"><strong>DIF:</strong> Diferencia de Goles</div>
+                    </div>
                     <table class="general-table">
                         <thead>
                             <tr>
