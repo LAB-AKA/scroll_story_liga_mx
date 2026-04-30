@@ -398,16 +398,20 @@ h2 {
     }
 
     .predictions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Forzar siempre 2 columnas exactas */
         gap: 1rem;
         justify-items: center; /* Asegura que los elementos del grid estén centrados horizontalmente */
+        width: 100%;
     }
 
     .prediction-card {
-        width: 100%; /* Cambiar de calc(50% - 0.5rem) a 100% para evitar desbordes */
-        max-width: 160px; /* Limitar el ancho máximo para que no crezcan demasiado */
-        padding: 1.5rem 1rem;
-        gap: 1rem;
-        margin: 0 auto; /* Centrar la tarjeta en sí */
+        width: 100%; /* Llenar la fracción completa asignada por el grid */
+        max-width: 100%; /* Remover limite rígido para aprovechar espacio de móviles pequeños */
+        padding: 1.5rem 0.5rem; /* Reducir padding lateral en móviles */
+        gap: 0.8rem;
+        margin: 0;
+        box-sizing: border-box;
     }
 
     .prediction-logo {
