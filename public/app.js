@@ -6,12 +6,43 @@ const frameCount = 329; // TOTAL DE IMÁGENES (Ajusta este número tras extraerl
 const images = [];
 const imagePath = (index) => `./imagenes_scroll/frame_${(index + 1).toString().padStart(4, '0')}.jpg`; // Ruta de las imágenes
 
-// Pre-cargar imágenes
+// Pre-cargar imágenes de forma asíncrona para no bloquear el hilo principal
 const preloadImages = () => {
-    for (let i = 0; i < frameCount; i++) {
+    // Primero cargar las imágenes iniciales (los primeros 30 frames) para mostrar algo rápido
+    const initialLoadCount = Math.min(30, frameCount);
+    
+    for (let i = 0; i < initialLoadCount; i++) {
         const img = new Image();
         img.src = imagePath(i);
         images.push(img);
+    }
+    
+    // Cargar el resto de las imágenes en segundo plano después de que la página ya es interactiva
+    if (frameCount > initialLoadCount) {
+        setTimeout(() => {
+            let i = initialLoadCount;
+            const loadNextBatch = () => {
+                const batchSize = 10;
+                const end = Math.min(i + batchSize, frameCount);
+                
+                for (; i < end; i++) {
+                    const img = new Image();
+                    img.src = imagePath(i);
+                    images.push(img);
+                }
+                
+                if (i < frameCount) {
+                    // Usar requestIdleCallback si está disponible, o un setTimeout pequeño
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(loadNextBatch);
+                    } else {
+                        setTimeout(loadNextBatch, 50);
+                    }
+                }
+            };
+            
+            loadNextBatch();
+        }, 500); // Esperar medio segundo antes de empezar a cargar el resto
     }
 };
 
@@ -197,7 +228,7 @@ const matchups = [
 ];
 
 // Helper to get logo path
-const getLogoUrl = (team) => `logos/${team}.png`;
+const getLogoUrl = (team) => `logos/${team}.webp`;
 
 // Helper to get result class
 const getResultClass = (result) => {
