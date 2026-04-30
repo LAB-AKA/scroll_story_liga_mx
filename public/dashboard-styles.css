@@ -295,7 +295,7 @@ h2 {
     .matchup-card {
         padding: 1rem;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 0; /* Changed from 1.5rem to 0 to manage spacing via the VS element */
     }
 
     .matchup-card::before {
@@ -303,7 +303,10 @@ h2 {
         left: auto;
         top: auto;
         transform: none;
-        margin: 0.5rem 0;
+        margin: 1rem 0; /* Add margin around the VS text */
+        display: block; /* Ensure it takes up its own line */
+        width: 100%;
+        text-align: center;
     }
 
     .matchup-card:hover::before { 
