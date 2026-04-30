@@ -208,7 +208,109 @@ h2 {
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
+/* =========================================
+   RESPONSIVE DESIGN - DASHBOARD
+   ========================================= */
+@media (max-width: 1200px) {
+    .charts-grid { 
+        grid-template-columns: 1fr; 
+    }
+}
+
 @media (max-width: 1024px) {
     .dashboard-row { grid-template-columns: 1fr; }
     .panel { border-right: none; border-bottom: 1px solid var(--border-color); }
+    
+    .row-1, .row-2, .row-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .panel { 
+        padding: 2rem 1.5rem; 
+    }
+
+    /* Tabla responsiva (Scroll horizontal) */
+    .panel-table {
+        overflow-x: auto;
+    }
+
+    .general-table {
+        min-width: 600px;
+    }
+
+    /* Gráficas más pequeñas en móvil */
+    .chart-wrapper {
+        min-height: 250px;
+        padding: 1rem;
+    }
+
+    /* Leyenda de enfrentamientos ajustada */
+    .form-legend {
+        gap: 1rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 1.5rem 1rem 1rem;
+    }
+
+    .header h1 {
+        font-size: 1.6rem;
+    }
+
+    .panel { 
+        padding: 1.5rem 1rem; 
+    }
+
+    .matchup-card {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .matchup-card::before {
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+        margin: 0.5rem 0;
+    }
+
+    .matchup-card:hover::before { 
+        transform: scale(1.1); 
+    }
+
+    .team-block { 
+        width: 100%; 
+    }
+
+    .team-form {
+        margin-bottom: 0.5rem;
+    }
+
+    .team-logo {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0.5rem;
+    }
+
+    .team-name {
+        font-size: 0.75rem;
+    }
 }
