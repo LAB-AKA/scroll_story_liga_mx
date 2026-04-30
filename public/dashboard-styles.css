@@ -95,6 +95,7 @@
 .panel-rendimiento { background: var(--bg-main); }
 .panel-disciplina { border-right: 1px solid var(--border-color); background: var(--bg-card); }
 .panel-insights { background: var(--bg-main); }
+.panel-predictions { border-top: 1px solid var(--border-color); background: var(--bg-card); grid-column: 1 / -1; }
 
 h2 {
     font-family: var(--font-header);
@@ -206,6 +207,67 @@ h2 {
 .chart-wrapper:hover {
     border-color: var(--accent-red); transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* =========================================
+   PREDICTIONS SECTION
+   ========================================= */
+.predictions-desc {
+    font-family: var(--font-data);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+    max-width: 800px;
+}
+
+.predictions-grid {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.prediction-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 180px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.4s ease;
+    border-bottom: 4px solid var(--accent-red);
+}
+
+.prediction-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-color: var(--accent-red);
+}
+
+.prediction-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
+    transition: transform 0.4s ease;
+}
+
+.prediction-card:hover .prediction-logo {
+    transform: scale(1.1);
+}
+
+.prediction-name {
+    font-family: var(--font-header);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+    text-align: center;
 }
 
 /* =========================================
@@ -329,5 +391,24 @@ h2 {
 
     .team-name {
         font-size: 0.75rem;
+    }
+
+    .predictions-grid {
+        gap: 1rem;
+    }
+
+    .prediction-card {
+        width: calc(50% - 0.5rem);
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+    }
+
+    .prediction-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .prediction-name {
+        font-size: 0.85rem;
     }
 }
