@@ -333,6 +333,11 @@ h2 {
         min-height: 250px;
         padding: 1rem;
     }
+    
+    /* Hacer más altas las gráficas horizontales para que los logos quepan bien */
+    .chart-horizontal {
+        min-height: 380px;
+    }
 
     /* Leyenda de enfrentamientos ajustada */
     .form-legend {
