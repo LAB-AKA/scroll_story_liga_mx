@@ -399,12 +399,15 @@ h2 {
 
     .predictions-grid {
         gap: 1rem;
+        justify-items: center; /* Asegura que los elementos del grid estén centrados horizontalmente */
     }
 
     .prediction-card {
-        width: calc(50% - 0.5rem);
+        width: 100%; /* Cambiar de calc(50% - 0.5rem) a 100% para evitar desbordes */
+        max-width: 160px; /* Limitar el ancho máximo para que no crezcan demasiado */
         padding: 1.5rem 1rem;
         gap: 1rem;
+        margin: 0 auto; /* Centrar la tarjeta en sí */
     }
 
     .prediction-logo {

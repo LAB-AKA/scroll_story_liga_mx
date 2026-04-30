@@ -90,6 +90,16 @@ window.addEventListener('scroll', () => {
     const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
     const scrollFraction = scrollTop / maxScrollTop;
     
+    // Ocultar el hint de scroll al empezar a bajar
+    const scrollHint = document.getElementById('scroll-hint');
+    if (scrollHint) {
+        if (scrollTop > 50) {
+            scrollHint.classList.add('hidden');
+        } else {
+            scrollHint.classList.remove('hidden');
+        }
+    }
+    
     // Calcular qué imagen corresponde al scroll actual
     const frameIndex = Math.min(
         frameCount - 1,
