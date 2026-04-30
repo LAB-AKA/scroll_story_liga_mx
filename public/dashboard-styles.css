@@ -94,8 +94,7 @@
 .panel-table { background: var(--bg-card); }
 .panel-rendimiento { background: var(--bg-main); }
 .panel-disciplina { border-right: 1px solid var(--border-color); background: var(--bg-card); }
-.panel-insights { background: var(--bg-main); }
-.panel-predictions { border-top: 1px solid var(--border-color); background: var(--bg-card); grid-column: 1 / -1; }
+.panel-right-column { background: var(--bg-main); display: flex; flex-direction: column; gap: 3rem; }
 
 h2 {
     font-family: var(--font-header);
@@ -212,31 +211,37 @@ h2 {
 /* =========================================
    PREDICTIONS SECTION
    ========================================= */
+.predictions-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Permite que ocupe el espacio restante */
+}
+
 .predictions-desc {
     font-family: var(--font-data);
     color: var(--text-secondary);
-    font-size: 1rem;
-    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
     line-height: 1.5;
-    max-width: 800px;
 }
 
 .predictions-grid {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-content: start;
 }
 
 .prediction-card {
-    background: var(--bg-main);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    width: 180px;
+    justify-content: center;
+    gap: 1rem;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: all 0.4s ease;
@@ -244,14 +249,15 @@ h2 {
 }
 
 .prediction-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     border-color: var(--accent-red);
+    background: var(--bg-hover);
 }
 
 .prediction-logo {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
     transition: transform 0.4s ease;
@@ -264,8 +270,8 @@ h2 {
 .prediction-name {
     font-family: var(--font-header);
     font-weight: 700;
-    font-size: 1.1rem;
-    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
     color: var(--text-primary);
     text-align: center;
 }
