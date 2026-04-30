@@ -12,7 +12,8 @@ body {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100vh; /* fallback */
+    height: 100dvh; /* Usa la altura dinámica del viewport en móviles para evitar saltos con la barra de navegación */
     z-index: -1; /* Para que el texto pase por encima */
 }
 
@@ -20,6 +21,7 @@ canvas {
     width: 100%;
     height: 100%;
     object-fit: cover; /* Asegura que el video llene la pantalla */
+    object-position: center; /* Mantiene la imagen centrada en móviles */
 }
 
 /* Contenedor del texto con altura para hacer scroll */
@@ -322,6 +324,33 @@ canvas {
 }
 
 @media (max-width: 480px) {
+    .step {
+        padding: 0 5%;
+        min-height: 100dvh; /* Adaptable a la barra de búsqueda del móvil */
+    }
+
+    .text-box {
+        padding: 1.25rem;
+        max-width: 95%;
+        margin: 0 auto;
+    }
+
+    .text-box h1 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .text-box h2 {
+        font-size: 1.15rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .text-box p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+    }
+
     .podium-container {
         gap: 5px;
         height: 180px;
