@@ -308,6 +308,7 @@ function renderBracket() {
         matchupCard.className = "matchup-card";
         matchupCard.innerHTML = `
             ${createTeamBlock(match.home, homeData)}
+            <div class="matchup-vs">VS</div>
             ${createTeamBlock(match.away, awayData)}
         `;
 

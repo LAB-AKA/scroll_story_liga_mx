@@ -133,14 +133,19 @@ h2 {
     background: var(--bg-card); border: 1px solid var(--border-color);
     padding: 1.5rem; display: flex; align-items: center;
     justify-content: space-between; transition: all 0.4s ease;
-    position: relative; border-radius: 0; cursor: pointer;
+    border-radius: 0; cursor: pointer;
 }
 
-.matchup-card::before {
-    content: "VS"; position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%); font-family: var(--font-header);
-    font-weight: 900; font-size: 1rem; color: var(--accent-silver);
-    letter-spacing: 0.2em; transition: all 0.4s ease;
+.matchup-vs {
+    font-family: var(--font-header);
+    font-weight: 900; 
+    font-size: 1rem; 
+    color: var(--accent-silver);
+    letter-spacing: 0.2em; 
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .matchup-card:hover {
@@ -148,7 +153,10 @@ h2 {
     transform: translateX(5px); box-shadow: -4px 0 0 0 var(--accent-red);
 }
 
-.matchup-card:hover::before { color: var(--accent-red); transform: translate(-50%, -50%) scale(1.1); }
+.matchup-card:hover .matchup-vs { 
+    color: var(--accent-red); 
+    transform: scale(1.1); 
+}
 
 .team-block { display: flex; flex-direction: column; align-items: center; width: 40%; z-index: 2; }
 .team-form { display: flex; gap: 2px; margin-bottom: 1rem; }
@@ -363,22 +371,12 @@ h2 {
     .matchup-card {
         padding: 1rem;
         flex-direction: column;
-        gap: 0; /* Changed from 1.5rem to 0 to manage spacing via the VS element */
+        gap: 1rem; /* Use flexbox gap for consistent spacing between teams and VS */
     }
 
-    .matchup-card::before {
-        position: relative;
-        left: auto;
-        top: auto;
-        transform: none;
-        margin: 1rem 0; /* Add margin around the VS text */
-        display: block; /* Ensure it takes up its own line */
+    .matchup-vs {
+        margin: 0;
         width: 100%;
-        text-align: center;
-    }
-
-    .matchup-card:hover::before { 
-        transform: scale(1.1); 
     }
 
     .team-block { 
