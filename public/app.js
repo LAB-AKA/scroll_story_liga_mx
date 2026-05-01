@@ -90,10 +90,23 @@ window.addEventListener('scroll', () => {
     const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
     const scrollFraction = scrollTop / maxScrollTop;
     
-    // Ocultar el hint de scroll al empezar a bajar
+    // Mantener el hint visible hasta llegar al dashboard
     const scrollHint = document.getElementById('scroll-hint');
-    if (scrollHint) {
+    const dashboard = document.getElementById('dashboard-section');
+    
+    if (scrollHint && dashboard) {
+        const dashboardTop = dashboard.offsetTop;
+        const hintText = scrollHint.querySelector('span');
+        
+        // Cambiar el texto una vez que el usuario empieza a deslizar
         if (scrollTop > 50) {
+            hintText.textContent = 'Sigue deslizando';
+        } else {
+            hintText.textContent = 'Desliza para comenzar';
+        }
+        
+        // Ocultar completamente solo cuando el usuario ya está viendo el dashboard
+        if (scrollTop > dashboardTop - window.innerHeight + 100) {
             scrollHint.classList.add('hidden');
         } else {
             scrollHint.classList.remove('hidden');
